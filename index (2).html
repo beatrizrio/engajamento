@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mural de Servos · Acamp's 2026.2</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --verde: #3B6D11; --verde-claro: #EAF3DE; --verde-medio: #639922; --borda-verde: #97C459;
+    --cinza-fundo: #F4F3EF; --cinza-borda: #E0DED6; --cinza-texto: #6B6B67;
+    --branco: #FFFFFF; --preto: #1A1A18;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  body { font-family: var(--font); background: var(--cinza-fundo); color: var(--preto); min-height: 100vh; }
+
+  .topo { background: var(--verde); color: white; text-align: center; padding: 28px 20px 24px; }
+  .topo-evento { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; opacity: .7; margin-bottom: 6px; }
+  .topo-titulo { font-size: 26px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 4px; }
+  .topo-sub { font-size: 13px; opacity: .75; }
+
+  .contador { display: flex; justify-content: center; background: var(--branco); border-bottom: 0.5px solid var(--cinza-borda); }
+  .contador-item { flex: 1; max-width: 140px; text-align: center; padding: 14px 8px; border-right: 0.5px solid var(--cinza-borda); }
+  .contador-item:last-child { border-right: none; }
+  .contador-num { font-size: 24px; font-weight: 700; color: var(--verde); line-height: 1; }
+  .contador-label { font-size: 10px; color: var(--cinza-texto); text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; }
+
+  .busca-wrap { max-width: 420px; margin: 20px auto 0; padding: 0 16px; position: relative; }
+  .busca-wrap svg { position: absolute; left: 26px; top: 50%; transform: translateY(-50%); color: var(--cinza-texto); pointer-events: none; }
+  .busca-wrap input { width: 100%; padding: 10px 14px 10px 36px; border: 0.5px solid var(--cinza-borda); border-radius: 99px; font-size: 14px; font-family: var(--font); background: var(--branco); color: var(--preto); outline: none; }
+  .busca-wrap input:focus { border-color: var(--verde-medio); box-shadow: 0 0 0 3px rgba(99,153,34,.1); }
+
+  .secao-titulo { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--cinza-texto); padding: 20px 14px 8px; max-width: 1200px; margin: 0 auto; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; padding: 0 14px 16px; max-width: 1200px; margin: 0 auto; }
+
+  .card { background: var(--branco); border: 0.5px solid var(--cinza-borda); border-radius: 14px; overflow: hidden; }
+  .card-header { padding: 12px 14px 10px; border-bottom: 0.5px solid var(--cinza-borda); background: var(--verde-claro); }
+  .card-header-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+  .card-nome { font-size: 14px; font-weight: 700; color: var(--verde); }
+  .card-badge { background: var(--verde); color: white; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 99px; white-space: nowrap; flex-shrink: 0; }
+  .card-coord { display: flex; align-items: center; gap: 7px; background: var(--branco); border: 0.5px solid var(--borda-verde); border-radius: 7px; padding: 6px 9px; }
+  .coord-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--verde); color: white; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; }
+  .coord-info { flex: 1; min-width: 0; }
+  .coord-label { font-size: 9px; text-transform: uppercase; letter-spacing: .06em; color: var(--verde-medio); font-weight: 600; }
+  .coord-nome { font-size: 11px; font-weight: 600; color: var(--preto); }
+  .coord-wpp { font-size: 10px; color: var(--cinza-texto); }
+
+  .membros { padding: 3px 0; }
+  .membro { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-bottom: 0.5px solid #F4F3EF; }
+  .membro:last-child { border-bottom: none; }
+  .membro:hover { background: var(--cinza-fundo); }
+  .m-avatar { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; }
+  .m-info { flex: 1; min-width: 0; }
+  .m-nome { font-size: 12px; font-weight: 500; color: var(--preto); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .m-wpp { font-size: 10px; color: var(--cinza-texto); }
+
+  .hl { background: #FFF176; border-radius: 2px; padding: 0 1px; }
+  .nenhum { text-align: center; padding: 48px 20px; color: var(--cinza-texto); font-size: 14px; }
+  .rodape { text-align: center; padding: 16px; font-size: 11px; color: var(--cinza-texto); border-top: 0.5px solid var(--cinza-borda); background: var(--branco); margin-top: 8px; }
+
+  @media (max-width: 480px) {
+    .grid { grid-template-columns: 1fr; }
+    .topo-titulo { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topo">
+  <div class="topo-evento">Comunidade Shalom</div>
+  <div class="topo-titulo">Acamp's 2026.2</div>
+  <div class="topo-sub">Mural de Servos · 2ª Etapa de Engajamento</div>
+  <div class="topo-sub">Hannah - (84)99973-2723</div>
+</div>
+
+<div class="contador">
+  <div class="contador-item"><div class="contador-num" id="cnt-servos">—</div><div class="contador-label">Servos</div></div>
+  <div class="contador-item"><div class="contador-num" id="cnt-equipes">—</div><div class="contador-label">Equipes</div></div>
+</div>
+
+<div class="busca-wrap">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+  <input type="text" id="busca" placeholder="Buscar seu nome..." oninput="filtrar()">
+</div>
+
+<div id="conteudo"></div>
+<div class="rodape">Acamp's 2026.2 · Comunidade Shalom · 2ª Etapa de Engajamento</div>
+
+<script>
+const GRUPOS = [
+  { titulo: null, equipes: [
+    { nome:"Cenáculo", coord:{nome:"Rosinha",wpp:"84 9 9211-7563"}, cor:["#E6F1FB","#0C447C"],
+      membros:[
+        {nome:"Karol Brilhante",wpp:"84987291030"},
+        {nome:"Lucas Soares Nunes",wpp:"84 991701701"},
+        {nome:"Uênia Rogenaide Varela Guedes",wpp:"849996249556"},
+        {nome:"Giovanna Andrade",wpp:"9 9665-3810"},
+        {nome:"Lucas de Azevedo da Silva",wpp:"(84)9 94982166"},
+      ]},
+    { nome:"Lojinha", coord:{nome:"Vitória Dias",wpp:"84 9 9615-8374"}, cor:["#FBEAF0","#72243E"],
+      membros:[
+        {nome:"Pietra Júlia Gomes Ribeiro",wpp:"84987131620"},
+        {nome:"Eduarda Rafaelly Lima França",wpp:"8498919562"},
+        {nome:"Alice Regina Jesus de Oliveira",wpp:"9 8854-0277"},
+        {nome:"Áurea Vitória Malaquias Tôrres",wpp:"84991377503"},
+      ]},
+    { nome:"Comunicação", coord:{nome:"Emanoel Victor",wpp:"84 9 9804-6700"}, cor:["#FAEEDA","#633806"],
+      membros:[
+        {nome:"Mateus César Oliveira Souza",wpp:"84996044516"},
+        {nome:"Gabriel Daniel Paulino da Costa",wpp:"(84) 98860 9916"},
+        {nome:"Victor Matheus Diniz Borges",wpp:"84986311665"},
+        {nome:"Julia Iasmim Santos de Castro",wpp:"(84) 992326396"},
+        {nome:"João Lucas de Macedo Silva",wpp:"84999401863"},
+        {nome:"Maria Clara Rodrigues da Silva",wpp:"84 99120-5885"},
+        {nome:"Alice Sebastiana",wpp:""},
+        {nome:"Laura Júlia Oliveira Liberalino",wpp:"(84) 98757-0431"},
+        {nome:"Ana Helena",wpp:""},
+      ]},
+    { nome:"Noites", coord:{nome:"Beatriz Helena",wpp:"84 9 9400-4271"}, cor:["#EEEDFE","#3C3489"],
+      membros:[
+        {nome:"Esther Varela Rodrigues",wpp:"84 996633502"},
+        {nome:"Ana Tereza da Cunha Martins",wpp:"84999389016"},
+        {nome:"Maria Alice Paiva Duarte",wpp:"84 994332676"},
+        {nome:"Assylla Hysis Silva Justino",wpp:"84 9 8102-4291"},
+        {nome:"Maria Flor Tenderini Roseno",wpp:"84 98119-2158"},
+        {nome:"Raissa Ester Nepomuceno da Silva",wpp:"84 98116-7663"},
+      ]},
+    { nome:"Lazer", coord:{nome:"Pedro Felipe",wpp:"84 9 8633-6013"}, cor:["#E1F5EE","#085041"],
+      membros:[
+        {nome:"Anna Beatriz do Nascimento",wpp:"84 991296037"},
+        {nome:"Jonatha Makson de Jesus Felix",wpp:"84986682287"},
+        {nome:"Amanda Nogueira Torres Lessa",wpp:"(84) 98135-1109"},
+        {nome:"Luiza Morena da Silva Adolpho Veríssimo",wpp:"84998510605"},
+        {nome:"José Aquiles Florêncio da Silva",wpp:"84991393498"},
+        {nome:"Francisco Fábio Bernardino Junior",wpp:"84 99165-8768"},
+        {nome:"Davi Medeiros da Rocha",wpp:"84 99934-0526"},
+      ]},
+    { nome:"Alojamento Fem.", coord:{nome:"Andressa Cvida",wpp:"84 9 8761-6404"}, cor:["#FAECE7","#712B13"],
+      membros:[
+        {nome:"Adryelly Rodrigues Simplicio",wpp:"84 9668-6573"},
+        {nome:"Fernanda Emilly da Silva Barbosa",wpp:"84994884875"},
+        {nome:"Wiryanna Camille Oliveira Lopes",wpp:"84939812224"},
+        {nome:"Maria Clara Regina Santos Pereira",wpp:"9 8835-3835"},
+        {nome:"Maria Alícia Santos Cruz Oliveira",wpp:"83 98220-1499"},
+        {nome:"Raíris Gabriely Júlio de Lima",wpp:"84 999861632"},
+      ]},
+    { nome:"Aconselhamento", coord:{nome:"Adriano Liryo",wpp:"84 9 9827-5232"}, cor:["#F1EFE8","#444441"],
+      membros:[
+        {nome:"Juslandia Cristiane de Souza Holanda",wpp:"84999370436"},
+        {nome:"Leila Daniele Fernandes da Silva Mesquita",wpp:"9 8816-8486"},
+      ]},
+    { nome:"Música", coord:{nome:"Malu",wpp:"84 9 9219-8005"}, cor:["#E6F1FB","#0C447C"],
+      membros:[
+        {nome:"Maria Cecília Canuto Pinheiro",wpp:"9 9146-3144"},
+        {nome:"Phelyppe Álex Vicente da Silva",wpp:"84994100804"},
+      ]},
+    { nome:"Amor em Atos", coord:{nome:"Lara",wpp:"84 9 9966-0246"}, cor:["#FBEAF0","#72243E"],
+      membros:[
+        {nome:"Maria Manuela Viana Souza",wpp:"(84) 991742001"},
+        {nome:"Maria Cecilya de Medeiros Fausto",wpp:"84997108144"},
+        {nome:"Letícia Rianne Siqueira do Nascimento",wpp:"84 991992021"},
+        {nome:"Letícia Gabriela Soares De Oliveira",wpp:"98888-3119"},
+        {nome:"Ana Clara Da Silva Souza",wpp:"99931-3523"},
+        {nome:"Maria Clara da Silva de Souza",wpp:"84991420941"},
+        {nome:"Caroline Moura Ribeiro",wpp:"84 99187-5686"},
+      ]},
+    { nome:"Liturgia", coord:{nome:"Gabriel Henrique",wpp:"84 9 9931-3703"}, cor:["#EEEDFE","#3C3489"],
+      membros:[
+        {nome:"Eduardo Medeiros da Rocha",wpp:"84 99679-9807"},
+        {nome:"Maria Gabrielle Marques Ferreira",wpp:"84 991953067"},
+        {nome:"Kaio Fernandes da Silva Gomes",wpp:"84 99499-7446"},
+        {nome:"Matheus Mendonça de Almeida",wpp:"8494332685"},
+        {nome:"Alice Regina Jesus de Oliveira",wpp:"9 8854-0277"},
+        {nome:"Claudivan da Silva Claudino Junior",wpp:"(84) 99910-8930"},
+      ]},
+    { nome:"Decoração", coord:{nome:"Sara Vasconcelos",wpp:"85 9 9737-1026"}, cor:["#E1F5EE","#085041"],
+      membros:[
+        {nome:"Julya Mikely Xavier Oliveira Dos Santos",wpp:"84 99950-2796"},
+        {nome:"Maria Luiza Peixoto Gonzalez",wpp:"84 981221492"},
+        {nome:"Maria Giovanna Holanda Ribeiro",wpp:"98812-2987"},
+        {nome:"Mariana Lemos",wpp:"84 9 9134-6565"},
+        {nome:"Ingrid Catarine Fernandes de Araújo",wpp:"84987930486"},
+      ]},
+    { nome:"Alojamento Masc.", coord:{nome:"Gabriel Cvida",wpp:"21 97934-1850"}, cor:["#FAECE7","#712B13"],
+      membros:[
+        {nome:"Nicholas Luan de Assunção Campelo",wpp:"84999414384"},
+        {nome:"Ioseph Campos Araujo",wpp:"99196-2118"},
+        {nome:"José Victor de Medeiros Gomes",wpp:"84994008014"},
+        {nome:"Gustavo Henrique Barros Alves",wpp:"84 981490777"},
+      ]},
+    { nome:"Ordem Masc.", coord:{nome:"Jorge",wpp:"84 9 9166-6004"}, cor:["#F1EFE8","#444441"],
+      membros:[
+        {nome:"Marcelo Augusto de Moura Santos",wpp:"98828-2539"},
+        {nome:"Kauan Oliveira de Medeiros",wpp:"84992092947"},
+        {nome:"Wanderson Breno Félix Santiago",wpp:"999215461"},
+        {nome:"Julio Santos da Silva Filho",wpp:"84 98177-0792"},
+        {nome:"Emanuell Rio",wpp:"84996472808"},
+        {nome:"José Wilson Rodrigues Júnior",wpp:"84994617813"},
+      ]},
+    { nome:"Ordem Fem.", coord:{nome:"Regina Cvida",wpp:"84 9 8768-8099"}, cor:["#FAEEDA","#633806"],
+      membros:[
+        {nome:"Maria Vitória de Araújo Santos",wpp:"9 8708-5415"},
+        {nome:"Luisa Farias Lyrio",wpp:"84 99702-8864"},
+        {nome:"Natally Fernandes de Araújo",wpp:"994543008"},
+        {nome:"Letícia Maira Oliveira Gomes",wpp:"999065927"},
+      ]},
+    { nome:"Inscrições", coord:{nome:"Clara Gabriela",wpp:"84 9 9611-2846"}, cor:["#E6F1FB","#0C447C"],
+      membros:[
+        {nome:"Giovanna Andrade",wpp:"9 9665-3810"},
+        {nome:"Nathália Maria Do Nascimento Franco",wpp:"84986077343"},
+      ]},
+    { nome:"Artes (Cia Acamp's)", coord:{nome:"Maria Luiza",wpp:"84 9 9219-8005"}, cor:["#EEEDFE","#3C3489"],
+      membros:[
+        {nome:"Sofia Maria Dos Santos Silva De Lima",wpp:"9 9708-5535"},
+        {nome:"Weslley Felipe dos Santos",wpp:"84999206651"},
+        {nome:"Gabriela Yane da Silva Souza",wpp:"84 9 87175044"},
+        {nome:"Angel Louise Tavares Alves",wpp:"84991837738"},
+        {nome:"Julia Moreira",wpp:"(84) 99460-6905"},
+        {nome:"Maria Cecília Pegado da Silva",wpp:"8499702-7315"},
+      ]},
+    { nome:"Lanchonete", coord:{nome:"Lucas Cvida",wpp:"84 9 9614-1575"}, cor:["#E1F5EE","#085041"],
+      membros:[
+        {nome:"Luiz Gabriel da Silva de Souza",wpp:"84 99469-0110"},
+        {nome:"Emanuela Lopes Cipriano",wpp:"84996823875"},
+        {nome:"Maria Cecilya de Medeiros Fausto",wpp:"84997108144"},
+        {nome:"Flaviano Simião da Silva",wpp:"84992152658"},
+        {nome:"Allonso Silva de Lima",wpp:"84986664792"},
+        {nome:"Igor Henrique Onofre da Silva",wpp:"84999927742"},
+        {nome:"Luiz Eduardo Torres de Araújo Lima Filho",wpp:"84 98839-6658"},
+        {nome:"Arthur David Tavares Teófilo",wpp:"84988249972"},
+      ]},
+    { nome:"Cursos", coord:{nome:"Pedro Justino",wpp:"84 9 8638-1163"}, cor:["#F1EFE8","#444441"],
+      membros:[
+        {nome:"Ana Tereza da Cunha Martins",wpp:"84999389016"},
+      ]},
+    { nome:"Caixas", coord:{nome:"—",wpp:""}, cor:["#FAEEDA","#633806"],
+      membros:[
+        {nome:"Vinícius Alves dos Santos",wpp:"996777960"},
+        {nome:"Gustavo Henrique Barros Alves",wpp:"84 981490777"},
+      ]},
+    { nome:"Ambulatório", coord:{nome:"Micarla Lopes",wpp:"84 9 8726-2111"}, cor:["#FBEAF0","#72243E"],
+      membros:[
+        {nome:"Larissa Queiroz de Albuquerque Canário",wpp:"84996824227"},
+      ]},
+    { nome:"Intercessão", coord:{nome:"Mayara",wpp:"84 9 8176-9944"}, cor:["#FAECE7","#712B13"],
+      membros:[
+        {nome:"Anne Louise Abreu de Andrade",wpp:"84 988163545"},
+        {nome:"Mariana Lopes Borges",wpp:"84996429908"},
+        {nome:"Miguel Fernando Rocha da Costa",wpp:"9 8150-3497"},
+        {nome:"Maria Thereza Cocentino Macedo",wpp:"84 99123-5668"},
+        {nome:"Daniel Hortencio da Costa",wpp:"98793-4950"},
+        {nome:"Maria de Amorim Rosa",wpp:"84 99918-9638"},
+        {nome:"Yanne Vitória de Macedo Correia",wpp:"9 9196-3393"},
+        {nome:"Pedro Fernandes Pimenta Neto",wpp:"9 99475 5112"},
+      ]},
+    { nome:"Acolhimento", coord:{nome:"Ana Clara",wpp:"84 9 8897-1740"}, cor:["#EAF3DE","#27500A"],
+      membros:[
+        {nome:"Yasmin Gabriela Tavares de Melo",wpp:"(84) 9938-4817"},
+        {nome:"Maria Vitória Maia de Carvalho",wpp:"9 9950-7993"},
+        {nome:"Maria de Amorim Rosa",wpp:"84 9918-9638"},
+        {nome:"Emanuella Mariana Fernandes de Medeiros",wpp:"84992147187"},
+        {nome:"Letícia Angela Marinho de Souza",wpp:"9 8754-5093"},
+      ]},
+    { nome:"Sala VIP", coord:{nome:"—",wpp:""}, cor:["#FAEEDA","#633806"], membros:[]},
+    { nome:"Transportes", coord:{nome:"Thiago",wpp:"84 9 8755-5475"}, cor:["#E6F1FB","#0C447C"], membros:[]},
+    { nome:"Reencontro", coord:{nome:"Priscilinha",wpp:"84 9 9117-7301"}, cor:["#EEEDFE","#3C3489"], membros:[]},
+    { nome:"Secretaria", coord:{nome:"Beatriz",wpp:"84 9 9172-6666"}, cor:["#E1F5EE","#085041"], membros:[]},
+    { nome:"Espaço da Misericórdia", coord:{nome:"Beatriz Cvida",wpp:"98 9 8128-7630"}, cor:["#E6F1FB","#0C447C"],
+      membros:[
+        {nome:"Francisco Fábio Bernardino Junior",wpp:"84 99165-8768"},
+      ]},
+    { nome:"Estrutura", coord:{nome:"Pedro Gabriel",wpp:"84 9 8750-2616"}, cor:["#FAECE7","#712B13"], membros:[
+      {nome:"Fernando Gabriel de Oliveira Barbosa",wpp:"9 9613-5272"},
+        {nome:"Francisco Lopes Da Silva Neto",wpp:"996088403"},
+        {nome:"Eduardo Gomes Da Silva Junior",wpp:"84 92169-8746"},
+        {nome:"Luis Miguel Eufrásio da Silva Garcia",wpp:"+55 84 98628-3648"},
+        {nome:"Alexandre Hudson Medeiros Araújo Filho",wpp:"999205960"},
+        {nome:"Miguel Forlan Cunha de Melo",wpp:"999135721"},
+    ]},
+    { nome:"Engajamento", coord:{nome:"Hannah Cvida",wpp:"84 9 9973-2723"}, cor:["#EAF3DE","#27500A"],
+      membros:[]},
+    { nome:"Financeiro", coord:{nome:"Iris",wpp:"84 9 8752-1683"}, cor:["#FBEAF0","#72243E"], membros:[
+      {nome:"Klaus Augustus Ramos Reiniger",wpp:"9 8753-1615"},
+    ]},
+    { nome:"Limpeza Masc.", coord:{nome:"Rafael",wpp:""}, cor:["#F1EFE8","#444441"],
+      membros:[
+        {nome:"Andson de Lima Barbosa",wpp:"84986092593"},
+        {nome:"Francisco Rycharlisson Silva do Nascimento",wpp:"84994782532"},
+        {nome:"João Victor de Lima Félix",wpp:"84998524375"},
+        {nome:"Enzo César de Jesus Chaves Neves",wpp:"84 9 86363908"},
+        {nome:"Arthur Amorim Vieira",wpp:"84 988202408"},
+        {nome:"Emanuel Gomes Pereira de Melo",wpp:"84 9685-1018"},
+        {nome:"Arthur David Tavares Teófilo",wpp:"84988249972"},
+      ]},
+    { nome:"Limpeza Fem.", coord:{nome:"Sara Costa",wpp:"84 9 8160-5776"}, cor:["#FAEEDA","#633806"],
+      membros:[
+        {nome:"Maria de Amorim Rosa",wpp:"84 9918-9638"},
+        {nome:"Clara Beatriz Gomes da Rocha",wpp:"84987780468"},
+        {nome:"Raissa Ester Nepomuceno da Silva",wpp:"981167663"},
+        {nome:"Sara Farias de Araújo",wpp:"+55 84 99404-5733"},
+        {nome:"Letícia Cruz da Silva",wpp:"8499784494"},
+        {nome:"Stella Ribeiro Teixeira de Paiva",wpp:"8499252338"},
+        {nome:"Maria Gabriela Santos Da Silva",wpp:"9 92116217"},
+      ]},
+    { nome:"Programação", coord:{nome:"Raquel",wpp:"84 9 9996-6466"}, cor:["#F1EFE8","#444441"], membros:[]},
+    { nome:"Cozinha", coord:{nome:"Ozilane",wpp:"84 9 8869-0005"}, cor:["#EAF3DE","#27500A"],
+      membros:[
+        {nome:"Fábio Medeiros Moura",wpp:"988352291"},
+        {nome:"Katiussia Maria Ribeiro Martins Moura",wpp:"988079067"},
+        {nome:"Andréia Fernandes Amorim",wpp:"84 999013031"},
+        {nome:"Andriel Araújo de Lima",wpp:"991956007"},
+        {nome:"Erik Cruz da Silva",wpp:"84 99106-2733"},
+        {nome:"Raquel Maria Fernandes da Silva",wpp:"84992125840"},
+        {nome:"Naiara Barros Lourenço",wpp:"55 84 992007540"},
+        {nome:"Jonas Prazeres da Silva",wpp:"99 841434703"},
+      ]},
+    { nome:"Pais de Família", coord:{nome:"Willams",wpp:"84 9 9147-6669"}, cor:["#FAEEDA","#633806"], membros:[]},
+  ]}
+];
+
+// Flatten all equipes
+const EQUIPES = GRUPOS.flatMap(g => g.equipes);
+const total = EQUIPES.reduce((s,e)=>s+e.membros.length,0);
+document.getElementById('cnt-servos').textContent = total;
+document.getElementById('cnt-equipes').textContent = EQUIPES.length;
+
+function ini(n){ return n.trim().split(' ').filter(Boolean).slice(0,2).map(p=>p[0].toUpperCase()).join(''); }
+function hl(t,q){ if(!q)return t; const i=t.toLowerCase().indexOf(q.toLowerCase()); if(i===-1)return t; return t.slice(0,i)+`<span class="hl">${t.slice(i,i+q.length)}</span>`+t.slice(i+q.length); }
+
+function filtrar(){ render(document.getElementById('busca').value.trim()); }
+
+function renderCard(eq, q){
+  const [bg,fg]=eq.cor;
+  const membrosHTML=eq.membros.length===0?`<div style="padding:10px 14px;font-size:12px;color:var(--cinza-texto);">Aguardando servos</div>`:eq.membros.map(m=>`<div class="membro">
+    <div class="m-avatar" style="background:${bg};color:${fg};">${ini(m.nome)}</div>
+    <div class="m-info"><div class="m-nome">${hl(m.nome,q)}</div>${m.wpp?`<div class="m-wpp">${m.wpp}</div>`:''}</div>
+  </div>`).join('');
+  const coordBlock = eq.coord.nome && eq.coord.nome !== '—' ? `<div class="card-coord">
+    <div class="coord-avatar">${ini(eq.coord.nome)}</div>
+    <div class="coord-info">
+      <div class="coord-label">Coordenador(a)</div>
+      <div class="coord-nome">${eq.coord.nome}</div>
+      ${eq.coord.wpp?`<div class="coord-wpp">${eq.coord.wpp}</div>`:''}
+    </div></div>` : '';
+  return `<div class="card">
+    <div class="card-header">
+      <div class="card-header-top"><div class="card-nome">${eq.nome}</div><div class="card-badge">${eq.membros.length} servo${eq.membros.length!==1?'s':''}</div></div>
+      ${coordBlock}
+    </div>
+    <div class="membros">${membrosHTML}</div>
+  </div>`;
+}
+
+function render(q){
+  const ql=q.toLowerCase();
+  const conteudo=document.getElementById('conteudo');
+  const filtradas=EQUIPES.map(eq=>({...eq,membros:ql?eq.membros.filter(m=>m.nome.toLowerCase().includes(ql)):eq.membros})).filter(eq=>!ql||eq.membros.length>0);
+  if(!filtradas.length){
+    conteudo.innerHTML=`<div class="nenhum">Nenhum servo encontrado com o nome "<strong>${q}</strong>".</div>`;
+    return;
+  }
+  conteudo.innerHTML=`<div class="grid">${filtradas.map(eq=>renderCard(eq,q)).join('')}</div>`;
+}
+
+render('');
+</script>
+</body>
+</html>
